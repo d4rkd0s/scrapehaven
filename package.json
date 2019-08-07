@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/d4rkd0s/scrapehaven/issues"
   },
-  "homepage": "https://github.com/d4rkd0s/scrapehaven#readme"
+  "homepage": "https://github.com/d4rkd0s/scrapehaven#readme",
+  "dependencies": {
+    "puppeteer": "^1.19.0"
+  }
 }
