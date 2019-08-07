@@ -1,0 +1,19 @@
+{
+  "name": "scrapehaven",
+  "version": "1.0.0",
+  "description": "Downloads full res images from wallhaven.cc with puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d4rkd0s/scrapehaven.git"
+  },
+  "author": "d4rkd0s",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/d4rkd0s/scrapehaven/issues"
+  },
+  "homepage": "https://github.com/d4rkd0s/scrapehaven#readme"
+}
