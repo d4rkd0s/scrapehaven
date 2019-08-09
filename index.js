@@ -3,24 +3,26 @@ const puppeteer = require('puppeteer');
 (async () => {
     require('dotenv').config({path: __dirname + '/.env'})
     const argv = require('yargs').argv
-    const fs = require('fs');
+    const fs = require("fs");
+    const request = require("request");
     const imageDownload = require('image-download');
     const imageType = require('image-type');
-
+    const path = require('path');
+    const https = require('https');
+    const Q = require('q');
+    
     function delay(timeout) {
         return new Promise((resolve) => {
             setTimeout(resolve, timeout);
         });
     }
-
-    function wallpaperIdFromElement(elementObject) {
-        var elementArray = Object.keys(elementObject).map(function(key) {
-            return [Number(key), elementObject[key]];
-        });
-        return elementArray[0][1]['wallpaperId'];  
-    }
+    
     // Default number of pages
     let pages = 1;
+    // Set max to really high
+    let max = 10000;
+    // Set max if passed
+    if(argv.max) { max = argv.max }
     // Check if there was a page count passed
     if(argv.pages) { pages = argv.pages }
     // Check if there wasn't a search term passed
@@ -59,9 +61,9 @@ const puppeteer = require('puppeteer');
             pagesLoaded++;
         }
     }
-
+    
     console.log(`pages requested: ${pages} pages loaded: ${pagesLoaded}`);
-
+    
     // Setup base count of images
     let numOfImages = 0;
     // Setup a var to loop with
@@ -79,39 +81,81 @@ const puppeteer = require('puppeteer');
     }
     
     console.log(`number of images to download: ${numOfImages}`);
-
-
+    
+    // Setup download function
+    // function download(uri, filename, callback) {
+    //     request.head(uri, function(err, res, body) {
+    //         request(uri)
+    //         .pipe(fs.createWriteStream(path.join(__dirname, 'images', filename)))
+    //         .on("close", callback);
+    //     });
+    // }
+    
+    // Setup download function
+    function download(url, filepath) {
+        var fileStream = fs.createWriteStream(path.join(__dirname, "images", filepath)),
+        deferred = Q.defer();
+        
+        fileStream.on('open', function () {
+            https.get(url, function (res) {
+                res.on('error', function (err) {
+                    deferred.reject(err);
+                });
+                
+                res.pipe(fileStream);
+            });
+        }).on('error', function (err) {
+            deferred.reject(err);
+        }).on('finish', function () {
+            deferred.resolve(filepath);
+        });
+        
+        return deferred.promise;
+    }
     
 
+    // Set counter for max
+    let imagesDownloaded = 0;
+    // For each page
+    for (let pageNum = 1; pageNum <= pages; pageNum++) { 
+        // For each image
+        for (let imageNum = 1; imageNum < (numOfImages/pages) * pageNum; imageNum++) {
+            await page.click(`#thumbs > section:nth-child(${pageNum}) > ul > li:nth-child(${imageNum}) > figure > a.preview`);
+            await delay(2000);
+            const [tabOne, tabTwo, tabThree] = (await browser.pages());
+            console.log(tabThree);
+            // const wallpaper = await tabThree.$("#wallpaper");
+            // console.log(wallpaper);
+            const imageUrl = await tabThree.evaluate(() =>
+            document.querySelector("#wallpaper").getAttribute('src') // image selector
+            );
+            console.log(imageUrl);
+            var filenameRegex = /[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/g;
+            let filename = imageUrl.match(filenameRegex)[0];
+            console.log(filename);
+            console.log(`Started download of ${imageUrl}`);
+            await download(imageUrl, filename);
+            imagesDownloaded++;
+            if(numOfImages >= max) {
+                console.log(`Downloaded ${filename} (${imagesDownloaded} of ${numOfImages})`);
+            } else {
+                console.log(`Downloaded ${filename} (${imagesDownloaded} of ${max}) you have a max set of ${max}`);
+            }
+            tabThree.close();
+            await delay(1000);
+            if(imagesDownloaded >= max) {
+                console.log(`Max images downloaded ${max}, override with --max=1000`);
+                process.exit(0);
+            }
+        }
+    }
+    
     console.log("a");
-    // #thumbs > section:nth-child(2) > ul > li:nth-child(1) > figure > a.preview
-
+    
+    // #thumbs > section:nth-child(1) > ul > li:nth-child(1) > figure > a.preview
+    
     // #thumbs > section > ul > li:nth-child(1) > figure > a.preview
-
-    // await page.click();
-
-    // const resultsSelector = '.thumb';
-    // const links = await page.evaluate(resultsSelector => {
-    //     const anchors = Array.from(document.querySelectorAll(resultsSelector));
-    //     return anchors;
-    // }, resultsSelector);
-
-    // fs.truncate('urls.txt', 0, function(){console.log('cleared file')})
-
-    // links.forEach(function(elementObject){
-    //     var wallpaperId = wallpaperIdFromElement(elementObject);
-    //     var url1 = "https://w.wallhaven.cc/full/" + wallpaperId.substring(0, 2) + "/wallhaven-" + wallpaperId + ".jpg";
-    //     var url2 = "https://w.wallhaven.cc/full/" + wallpaperId.substring(0, 2) + "/wallhaven-" + wallpaperId + ".png";
-    //     fs.appendFile('urls.txt', url1 + "\n", function (err) {
-    //         if (err) throw err;
-    //             console.log('Saved ' + wallpaperId);
-    //     });
-    //     fs.appendFile('urls.txt', url2 + "\n", function (err) {
-    //         if (err) throw err;
-    //             console.log('Saved ' + wallpaperId);
-    //     });
-    // });
-
+    
     console.log("Closing in 3 seconds");
     await delay(3000);
     // await browser.close();

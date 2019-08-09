@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/index.js",
             "args": [
                 "--search='rick and morty'",
-                "--pages=3"
+                "--pages=1",
+                "--max=5"
             ]
         }
     ]
