@@ -142,7 +142,8 @@ const puppeteer = require('puppeteer');
     // For each page
     for (let pageNum = 1; pageNum <= pages; pageNum++) { 
         // For each image
-        for (let imageNum = 1; imageNum < (numOfImages/pages) * pageNum; imageNum++) {
+        // (numOfImages/pages) * pageNum
+        for (let imageNum = 1; imageNum < 65; imageNum++) {
             const pageTarget = page.target(); //save this to know that this was the opener
             await page.click(`#thumbs > section:nth-child(${pageNum}) > ul > li:nth-child(${imageNum}) > figure > a.preview`);
             const newTarget = await browser.waitForTarget(target => target.opener() === pageTarget); //check that you opened this page, rather than just checking the url
@@ -166,6 +167,8 @@ const puppeteer = require('puppeteer');
                 console.log(`Downloaded ${filename} (${imagesDownloaded} of ${max}) you have a max set of ${max}`);
             }
             await tabThree.close();
+            // Delay 1 second after closing tab to emulate a human, the api throttles otherwise around ~45/req
+            await delay(1000);
             if(imagesDownloaded >= max) {
                 console.log(`Max images downloaded ${max}, override with --max=1000`);
                 process.exit(0);
