@@ -19,14 +19,24 @@ Copy the example env to a .env
 
 `cp .env.example .env`
 
-Fill out the `.env` file
+Fill out the `.env` file with your Wallhaven credentials
 
-Open a text editor and change .env to contain your login details
+You are ready to go!
 
 ## Use
 
 To search and download for a term run
 
-`node index.js --search="what you want to search"`
+```
+node index.js --search='sexy' \
+                --pages=1 \
+                --max=10 \
+                --general=false \
+                --anime=false \
+                --people=true \
+                --sfw=false \
+                --sketchy=true \
+                --nsfw=false
+```
 
 More options like sorting, SFW levels, how many to download are coming soon.

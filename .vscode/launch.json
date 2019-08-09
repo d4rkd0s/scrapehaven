@@ -10,9 +10,15 @@
             "name": "Run scrapehaven",
             "program": "${workspaceFolder}/index.js",
             "args": [
-                "--search='space'",
+                "--search='sexy'",
                 "--pages=1",
-                "--max=10"
+                "--max=10",
+                "--general=false",
+                "--anime=false",
+                "--people=true",
+                "--sfw=false",
+                "--sketchy=true",
+                "--nsfw=false"
             ]
         }
     ]

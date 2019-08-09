@@ -41,6 +41,39 @@ const puppeteer = require('puppeteer');
     await page.click('#login > p:nth-child(4) > button');
     // Enter the search box by clicking into it
     await page.click('#header-search-text');
+    await delay(1000);
+    // Check for unchecks
+    if(argv.general == "false") {
+        // Uncheck general
+        await page.click('#search-category-checks > label:nth-child(2)');
+        await delay(300);
+    }
+    if(argv.anime == "false") {
+        // Uncheck anime
+        await page.click('#search-category-checks > label:nth-child(4)');
+        await delay(300);
+    }
+    if(argv.people == "false") {
+        // Uncheck people
+        await page.click('#search-category-checks > label:nth-child(6)');
+        await delay(300);
+    }
+    if(argv.sfw == "false") {
+        // Uncheck SFW
+        await page.click('#search-purity-checks > label.purity.sfw');
+        await delay(300);
+    }
+    if(argv.sketchy == "false") {
+        // Uncheck Sketchy
+        await page.click('#search-category-checks > label:nth-child(6)');
+        await delay(300);
+    }
+    if(argv.nsfw == "false") {
+        // Uncheck NSFW
+        await page.click('#search-purity-checks > label.purity.nsfw');
+        await delay(300);
+    }
+    
     // Enter the text from argv.search
     await page.type('#header-search-text', argv.search);
     // Click search
