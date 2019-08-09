@@ -39,6 +39,9 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 
+# IDE
+.vscode/
+
 # Optional npm cache directory
 .npm
 
@@ -63,3 +66,4 @@ typings/
 # Ignore Images
 images/*
 !images/.gitkeep
+.vscode/launch.json
