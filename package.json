@@ -18,6 +18,7 @@
   "homepage": "https://github.com/d4rkd0s/scrapehaven#readme",
   "dependencies": {
     "dotenv": "^8.0.0",
+    "image-download": "^1.2.0",
     "puppeteer": "^1.19.0",
     "yargs": "^13.3.0"
   }
