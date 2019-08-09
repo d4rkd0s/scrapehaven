@@ -32,7 +32,7 @@ const puppeteer = require('puppeteer');
     // Create a new page
     const page = await browser.newPage();
     // Goto wallhaven's login page
-    await page.goto('https://wallhaven.cc/login');
+    await page.goto('https://wallhaven.cc/login', { 'waitUntil' : 'networkidle0' });
     // Enter the username
     await page.type('#username', process.env.WALLHAVEN_USERNAME);
     // Enter the password
@@ -83,15 +83,6 @@ const puppeteer = require('puppeteer');
     console.log(`number of images to download: ${numOfImages}`);
     
     // Setup download function
-    // function download(uri, filename, callback) {
-    //     request.head(uri, function(err, res, body) {
-    //         request(uri)
-    //         .pipe(fs.createWriteStream(path.join(__dirname, 'images', filename)))
-    //         .on("close", callback);
-    //     });
-    // }
-    
-    // Setup download function
     function download(url, filepath) {
         var fileStream = fs.createWriteStream(path.join(__dirname, "images", filepath)),
         deferred = Q.defer();
@@ -113,23 +104,23 @@ const puppeteer = require('puppeteer');
         return deferred.promise;
     }
     
-
     // Set counter for max
     let imagesDownloaded = 0;
     // For each page
     for (let pageNum = 1; pageNum <= pages; pageNum++) { 
         // For each image
         for (let imageNum = 1; imageNum < (numOfImages/pages) * pageNum; imageNum++) {
+            const pageTarget = page.target(); //save this to know that this was the opener
             await page.click(`#thumbs > section:nth-child(${pageNum}) > ul > li:nth-child(${imageNum}) > figure > a.preview`);
-            await delay(2000);
-            const [tabOne, tabTwo, tabThree] = (await browser.pages());
-            console.log(tabThree);
-            // const wallpaper = await tabThree.$("#wallpaper");
-            // console.log(wallpaper);
+            const newTarget = await browser.waitForTarget(target => target.opener() === pageTarget); //check that you opened this page, rather than just checking the url
+            const newPage = await newTarget.page(); //get the page object
+            await newPage.waitForSelector("body"); //wait for page to be loaded
+            console.log("Browser ready");
+            const tabThree = newPage;
             const imageUrl = await tabThree.evaluate(() =>
-            document.querySelector("#wallpaper").getAttribute('src') // image selector
+                document.querySelector("#wallpaper").getAttribute('src') // image selector
             );
-            console.log(imageUrl);
+            console.log(`Found image ${imageUrl}`);
             var filenameRegex = /[^/\\&\?]+\.\w{3,4}(?=([\?&].*$|$))/g;
             let filename = imageUrl.match(filenameRegex)[0];
             console.log(filename);
@@ -141,22 +132,15 @@ const puppeteer = require('puppeteer');
             } else {
                 console.log(`Downloaded ${filename} (${imagesDownloaded} of ${max}) you have a max set of ${max}`);
             }
-            tabThree.close();
-            await delay(1000);
+            await tabThree.close();
             if(imagesDownloaded >= max) {
                 console.log(`Max images downloaded ${max}, override with --max=1000`);
                 process.exit(0);
             }
         }
     }
-    
-    console.log("a");
-    
-    // #thumbs > section:nth-child(1) > ul > li:nth-child(1) > figure > a.preview
-    
-    // #thumbs > section > ul > li:nth-child(1) > figure > a.preview
-    
-    console.log("Closing in 3 seconds");
+    console.log("All done! Closing in 3 seconds");
     await delay(3000);
-    // await browser.close();
+    await browser.close();
+    process.exit(0);
 })();

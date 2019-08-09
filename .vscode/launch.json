@@ -10,9 +10,9 @@
             "name": "Run scrapehaven",
             "program": "${workspaceFolder}/index.js",
             "args": [
-                "--search='rick and morty'",
+                "--search='space'",
                 "--pages=1",
-                "--max=5"
+                "--max=10"
             ]
         }
     ]
