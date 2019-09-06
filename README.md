@@ -39,4 +39,4 @@ node index.js --search='sexy' \
                 --nsfw=false
 ```
 
-More options like sorting, SFW levels, how many to download are coming soon.
+More options like sorting are coming soon.
