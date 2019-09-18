@@ -1,4 +1,5 @@
-# scrapehaven
+![scrapehaven-logo](https://github.com/d4rkd0s/scrapehaven/raw/master/scrape-haven-logo.png)
+
 Downloads full res images from wallhaven.cc with puppeteer
 
 ## Setup
