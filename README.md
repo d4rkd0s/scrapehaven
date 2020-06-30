@@ -29,7 +29,7 @@ You are ready to go!
 To search and download for a term run
 
 ```
-node index.js --search='sexy' \
+node index.js --search='space' \
                 --pages=1 \
                 --max=10 \
                 --general=false \
