@@ -4,9 +4,6 @@ const puppeteer = require('puppeteer');
     require('dotenv').config({path: __dirname + '/.env'})
     const argv = require('yargs').argv
     const fs = require("fs");
-    const request = require("request");
-    const imageDownload = require('image-download');
-    const imageType = require('image-type');
     const path = require('path');
     const https = require('https');
     const Q = require('q');
@@ -18,7 +15,7 @@ const puppeteer = require('puppeteer');
     }
     
     // Default number of pages
-    let pages = 1;
+    let pages = 10;
     // Set max to really high
     let max = 10000;
     // Set max if passed
@@ -27,8 +24,16 @@ const puppeteer = require('puppeteer');
     if(argv.pages) { pages = argv.pages }
     // Check if there wasn't a search term passed
     if(!argv.search) { console.log("Please pass a search term with --search=thingtosearch"); process.exit(0); }
+    // default category to general if none are supplied
+    if (!argv.general && !argv.anime && !argv.people) {
+        argv.general = 'true';
+    }
+    // default purity to sfw if none are supplied
+    if (!argv.sfw && !argv.sketchy && !argv.nsfw) {
+        argv.sfw = 'true';
+    }
     // Setup the browser
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: argv.headless ? argv.headless : false});
     // Create a new page
     const page = await browser.newPage();
     // Goto wallhaven's login page
@@ -42,38 +47,145 @@ const puppeteer = require('puppeteer');
     // Enter the search box by clicking into it
     await page.click('#header-search-text');
     await delay(1000);
-    // Check for unchecks
-    if(argv.general == "false") {
+
+    // remove all default selections - defined unique by user profile
+    let inputValue;
+
+    const generalId = await page.$$("#search-general")
+    inputValue = await generalId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-category-checks > label:nth-child(2)');
+        await delay(300);
+    }
+
+    const animeId = await page.$$("#search-anime")
+    inputValue = await animeId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-category-checks > label:nth-child(4)');
+        await delay(300);
+    }
+
+    const peopleId = await page.$$("#search-people")
+    inputValue = await peopleId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-category-checks > label:nth-child(6)');
+        await delay(300);
+    }
+
+    const sfwId = await page.$$("#search-sfw")
+    inputValue = await sfwId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-purity-checks > label.purity.sfw');
+        await delay(300);
+    }
+
+    const sketchyId = await page.$$("#search-sketchy")
+    inputValue = await sketchyId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-purity-checks > label.purity.sketchy');
+        await delay(300);
+    }
+
+    const nsfwId = await page.$$("#search-nsfw")
+    inputValue = await nsfwId[0].getProperty('checked');
+    inputValue = await inputValue.jsonValue();
+
+    if (inputValue) {
+        await page.click('#search-purity-checks > label.purity.nsfw');
+        await delay(300);
+    }
+
+    // Check for settings
+    if(argv.general === "true") {
         // Uncheck general
         await page.click('#search-category-checks > label:nth-child(2)');
         await delay(300);
     }
-    if(argv.anime == "false") {
+    if(argv.anime === "true") {
         // Uncheck anime
         await page.click('#search-category-checks > label:nth-child(4)');
         await delay(300);
     }
-    if(argv.people == "false") {
+    if(argv.people === "true") {
         // Uncheck people
         await page.click('#search-category-checks > label:nth-child(6)');
         await delay(300);
     }
-    if(argv.sfw == "false") {
+    if(argv.sfw === "true") {
         // Uncheck SFW
         await page.click('#search-purity-checks > label.purity.sfw');
         await delay(300);
     }
-    if(argv.sketchy == "false") {
+    if(argv.sketchy === "true") {
         // Uncheck Sketchy
-        await page.click('#search-category-checks > label:nth-child(6)');
+        await page.click('#search-purity-checks > label.purity.sketchy');
         await delay(300);
     }
-    if(argv.nsfw == "false") {
+    if(argv.nsfw === "true") {
         // Uncheck NSFW
         await page.click('#search-purity-checks > label.purity.nsfw');
         await delay(300);
     }
     
+    if (argv.ratio) {
+        await page.click('#search-ratios');
+        await delay(300);
+        switch (argv.ratio) {
+            case '16x9':
+                await page.$eval('#searchbar-ratio-16x9', elem => elem.click());
+                await delay(300);
+                break;
+            case '16x10':
+                await page.$eval('#searchbar-ratio-16x10', elem => elem.click());
+                await delay(300);
+                break;
+        }
+    }
+
+    if (argv.res) {
+        await page.click('#search-resolutions');
+        await delay(300);
+        switch (argv.res) {
+            case '720p':
+                await page.$eval('#searchbar-respicker-1280x720', elem => elem.click());
+                await delay(300);
+                break;
+            case '1080p':
+                await page.$eval('#searchbar-respicker-1920x1080', elem => elem.click());
+                await delay(300);
+                break;
+            case '4k':
+                await page.$eval('#searchbar-respicker-3840x2160', elem => elem.click());
+                await delay(300);
+                break;
+        }
+    }
+
+    if (argv.sort) {
+        await page.click('#search-sorting');
+        await delay(300);
+        switch (argv.sort) {
+            case 'random':
+                await page.$eval('#search-sorting-random', elem => elem.click());
+                await delay(300);
+                break;
+            case 'date_added':
+                await page.$eval('#search-sorting-date', elem => elem.click());
+                await delay(300);
+                break;
+        }
+    }
+
     // Enter the text from argv.search
     await page.type('#header-search-text', argv.search);
     // Click search

@@ -1,6 +1,6 @@
 {
   "name": "scrapehaven",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Downloads full res images from wallhaven.cc with puppeteer",
   "main": "index.js",
   "scripts": {
@@ -8,21 +8,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/d4rkd0s/scrapehaven.git"
+    "url": "git+https://github.com/amritzzzz/scrapehaven.git"
   },
   "author": "d4rkd0s",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/d4rkd0s/scrapehaven/issues"
+    "url": "https://github.com/amritzzzz/scrapehaven/issues"
   },
-  "homepage": "https://github.com/d4rkd0s/scrapehaven#readme",
+  "homepage": "https://github.com/amritzzzz/scrapehaven#readme",
   "dependencies": {
     "dotenv": "^8.0.0",
     "http": "0.0.0",
-    "image-download": "^1.2.0",
     "puppeteer": "^1.19.0",
     "q": "^1.5.1",
-    "request": "^2.88.0",
     "yargs": "^13.3.0"
   }
 }
