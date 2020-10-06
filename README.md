@@ -20,7 +20,7 @@ Copy the example env to a .env
 
 `cp .env.example .env`
 
-Fill out the `.env` file with your Wallhaven credentials
+Fill out the `.env` file with your Wallhaven credentials (Account is required)
 
 You are ready to go!
 
@@ -69,12 +69,19 @@ This option defines if the browser is visible when navigating the website
 ## Defaults
 
 `--search` is required
+
 `--page`default is 10
+
 `--max` default is 10000
+
 `--general; --anime; --people; --sfw; --sketchy; --nsfw` default to unchecked/unselected overriding your default user options
+
 `--res` defaults is none
+
 `--ratio` defaults is none
+
 `--sort` defaults is relevance
+
 `--headless` defaults to false
 
 ## Batch Script
