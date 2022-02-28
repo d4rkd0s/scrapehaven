@@ -1,4 +1,4 @@
-![scrapehaven-logo](https://github.com/d4rkd0s/scrapehaven/raw/master/scrape-haven-logo.png)
+![scrapehaven-logo](https://raw.githubusercontent.com/d4rkd0s/scrapehaven/main/scrape-haven-logo.png)
 
 <p style="text-align: center;">Automatically downloads full res images from wallhaven.cc with javascript+puppeteer</p>
 
