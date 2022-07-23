@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
-(async () => {
-    require('dotenv').config({path: __dirname + '/.env'})
+(async() => {
+    require('dotenv').config({ path: __dirname + '/.env' })
     const argv = require('yargs').argv
     const fs = require("fs");
     const request = require("request");
@@ -10,29 +10,30 @@ const puppeteer = require('puppeteer');
     const path = require('path');
     const https = require('https');
     const Q = require('q');
-    
+
     function delay(timeout) {
         return new Promise((resolve) => {
             setTimeout(resolve, timeout);
         });
     }
-    
+
     // Default number of pages
     let pages = 1;
     // Set max to really high
     let max = 10000;
     // Set max if passed
-    if(argv.max) { max = argv.max }
+    if (argv.max) { max = argv.max }
     // Check if there was a page count passed
-    if(argv.pages) { pages = argv.pages }
+    if (argv.pages) { pages = argv.pages }
     // Check if there wasn't a search term passed
-    if(!argv.search) { console.log("Please pass a search term with --search=thingtosearch"); process.exit(0); }
+    if (!argv.search) { console.log("Please pass a search term with --search=thingtosearch");
+        process.exit(0); }
     // Setup the browser
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
+    const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false });
     // Create a new page
     const page = await browser.newPage();
     // Goto wallhaven's login page
-    await page.goto('https://wallhaven.cc/login', { 'waitUntil' : 'networkidle0' });
+    await page.goto('https://wallhaven.cc/login', { 'waitUntil': 'networkidle0' });
     // Enter the username
     await page.type('#username', process.env.WALLHAVEN_USERNAME);
     // Enter the password
@@ -43,37 +44,37 @@ const puppeteer = require('puppeteer');
     await page.click('#header-search-text');
     await delay(1000);
     // Check for unchecks
-    if(argv.general == "false") {
+    if (argv.general == "false") {
         // Uncheck general
         await page.click('#search-category-checks > label:nth-child(2)');
         await delay(300);
     }
-    if(argv.anime == "false") {
+    if (argv.anime == "false") {
         // Uncheck anime
         await page.click('#search-category-checks > label:nth-child(4)');
         await delay(300);
     }
-    if(argv.people == "false") {
+    if (argv.people == "false") {
         // Uncheck people
         await page.click('#search-category-checks > label:nth-child(6)');
         await delay(300);
     }
-    if(argv.sfw == "false") {
+    if (argv.sfw == "false") {
         // Uncheck SFW
         await page.click('#search-purity-checks > label.purity.sfw');
         await delay(300);
     }
-    if(argv.sketchy == "false") {
+    if (argv.sketchy == "false") {
         // Uncheck Sketchy
         await page.click('#search-category-checks > label:nth-child(6)');
         await delay(300);
     }
-    if(argv.nsfw == "false") {
+    if (argv.nsfw == "false") {
         // Uncheck NSFW
         await page.click('#search-purity-checks > label.purity.nsfw');
         await delay(300);
     }
-    
+
     // Enter the text from argv.search
     await page.type('#header-search-text', argv.search);
     // Click search
@@ -83,7 +84,7 @@ const puppeteer = require('puppeteer');
     // Setup a var to loop with
     let pagesLoaded = 1;
     // If more than 1 page was requested
-    if(pages > 1) {
+    if (pages > 1) {
         // Loop through additional pages until we reach the pages count
         while (pages > pagesLoaded) {
             // Get a second page
@@ -94,15 +95,15 @@ const puppeteer = require('puppeteer');
             pagesLoaded++;
         }
     }
-    
+
     console.log(`pages requested: ${pages} pages loaded: ${pagesLoaded}`);
-    
+
     // Setup base count of images
     let numOfImages = 0;
     // Setup a var to loop with
     let pageToCount = 1;
     // If more than 1 page was requested
-    if(pages > 1) {
+    if (pages > 1) {
         // Loop through additional pages until we reach the pages count
         while (pages > pageToCount) {
             numOfImages += await page.$$eval(`#thumbs > section:nth-child(${pageToCount}) > ul > li`, lis => lis.length);
@@ -112,35 +113,35 @@ const puppeteer = require('puppeteer');
         // Just read page 1 content
         numOfImages = await page.$$eval('#thumbs > section > ul > li', lis => lis.length);
     }
-    
+
     console.log(`number of images to download: ${numOfImages}`);
-    
+
     // Setup download function
     function download(url, filepath) {
         var fileStream = fs.createWriteStream(path.join(__dirname, "images", filepath)),
-        deferred = Q.defer();
-        
-        fileStream.on('open', function () {
-            https.get(url, function (res) {
-                res.on('error', function (err) {
+            deferred = Q.defer();
+
+        fileStream.on('open', function() {
+            https.get(url, function(res) {
+                res.on('error', function(err) {
                     deferred.reject(err);
                 });
-                
+
                 res.pipe(fileStream);
             });
-        }).on('error', function (err) {
+        }).on('error', function(err) {
             deferred.reject(err);
-        }).on('finish', function () {
+        }).on('finish', function() {
             deferred.resolve(filepath);
         });
-        
+
         return deferred.promise;
     }
-    
+
     // Set counter for max
     let imagesDownloaded = 0;
     // For each page
-    for (let pageNum = 1; pageNum <= pages; pageNum++) { 
+    for (let pageNum = 1; pageNum <= pages; pageNum++) {
         // For each image
         // (numOfImages/pages) * pageNum
         for (let imageNum = 1; imageNum < 65; imageNum++) {
@@ -161,7 +162,7 @@ const puppeteer = require('puppeteer');
             console.log(`Started download of ${imageUrl}`);
             await download(imageUrl, filename);
             imagesDownloaded++;
-            if(numOfImages >= max) {
+            if (numOfImages >= max) {
                 console.log(`Downloaded ${filename} (${imagesDownloaded} of ${numOfImages})`);
             } else {
                 console.log(`Downloaded ${filename} (${imagesDownloaded} of ${max}) you have a max set of ${max}`);
@@ -169,7 +170,7 @@ const puppeteer = require('puppeteer');
             await tabThree.close();
             // Delay 1 second after closing tab to emulate a human, the api throttles otherwise around ~45/req
             await delay(1000);
-            if(imagesDownloaded >= max) {
+            if (imagesDownloaded >= max) {
                 console.log(`Max images downloaded ${max}, override with --max=1000`);
                 process.exit(0);
             }
