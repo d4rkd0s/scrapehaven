@@ -19,7 +19,7 @@
   "dependencies": {
     "dotenv": "^8.0.0",
     "http": "0.0.0",
-    "image-download": "^1.2.0",
+    "image-download": "^1.4.0",
     "puppeteer": "^1.19.0",
     "q": "^1.5.1",
     "request": "^2.88.0",
